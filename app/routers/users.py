@@ -9,6 +9,7 @@ from app.schemas.user import UserCreate, UserResponse
 from app.services.auth_service import hash_password
 from app.schemas.user import UserLogin
 from app.services.auth_service import verify_password
+from app.auth.jwt_handler import create_access_token
 
 router = APIRouter(
     prefix="/users",
@@ -63,8 +64,15 @@ def login_user(
             detail="Invalid credentials"
         )
 
+    access_token = create_access_token(
+    {
+        "sub": user.email
+    }
+)
+
     return {
-        "message": "Login successful"
+        "access_token": access_token,
+        "token_type": "bearer"
     }
 
 @router.get("/", response_model=List[UserResponse])
