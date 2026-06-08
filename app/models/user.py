@@ -1,6 +1,9 @@
 from sqlalchemy import Column
 from sqlalchemy import Integer
 from sqlalchemy import String
+from sqlalchemy.orm import relationship
+
+from app.models.user_preference import user_preferences
 
 from app.database import Base
 
@@ -25,4 +28,10 @@ class User(Base):
     hashed_password = Column(
         String,
         nullable=False
+    )
+
+    dietary_preferences = relationship(
+        "DietaryPreference",
+        secondary=user_preferences,
+        back_populates="users"
     )

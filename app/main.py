@@ -8,7 +8,10 @@ from app.models.restaurant import Restaurant
 from app.models.menu_item import MenuItem
 from app.models.ingredient import Ingredient
 from app.models.menu_item_ingredient import menu_item_ingredients
+from app.models.dietary_preference import DietaryPreference
+from app.models.user_preference import user_preferences
 
+from app.routers import dietary_preferences
 from app.routers import ingredients
 from app.routers import restaurants
 from app.routers import users
@@ -25,6 +28,7 @@ app = FastAPI(
 app.include_router(users.router)
 app.include_router(restaurants.router)
 app.include_router(ingredients.router)
+app.include_router(dietary_preferences.router)
 
 @app.get("/")
 def root():
