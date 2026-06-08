@@ -133,3 +133,52 @@ def add_ingredient_to_menu_item(
     return {
         "message": f"{ingredient.name} added to {menu_item.name}"
     }
+
+@router.delete("/{restaurant_id}/menu-items/{menu_item_id}")
+def delete_menu_item(
+    restaurant_id: int,
+    menu_item_id: int,
+    db: Session = Depends(get_db)
+):
+    menu_item = db.query(MenuItem).filter(
+        MenuItem.id == menu_item_id,
+        MenuItem.restaurant_id == restaurant_id
+    ).first()
+
+    if not menu_item:
+        raise HTTPException(
+            status_code=404,
+            detail="Menu item not found for this restaurant"
+        )
+
+    db.delete(menu_item)
+    db.commit()
+
+    return {
+        "message": "Menu item deleted"
+    }
+
+@router.put("/{restaurant_id}/menu-items/{menu_item_id}", response_model=MenuItemResponse)
+def update_menu_item(
+    restaurant_id: int,
+    menu_item_id: int,
+    menu_item_update: MenuItemCreate,
+    db: Session = Depends(get_db)
+):
+    menu_item = db.query(MenuItem).filter(
+        MenuItem.id == menu_item_id,
+        MenuItem.restaurant_id == restaurant_id
+    ).first()
+
+    if not menu_item:
+        raise HTTPException(
+            status_code=404,
+            detail="Menu item not found for this restaurant"
+        )
+
+    menu_item.name = menu_item_update.name
+
+    db.commit()
+    db.refresh(menu_item)
+
+    return menu_item
