@@ -3,6 +3,8 @@ from sqlalchemy.orm import relationship
 
 from app.database import Base
 
+from app.models.menu_item_ingredient import menu_item_ingredients
+
 
 class MenuItem(Base):
     __tablename__ = "menu_items"
@@ -18,5 +20,11 @@ class MenuItem(Base):
 
     restaurant = relationship(
         "Restaurant",
+        back_populates="menu_items"
+    )
+
+    ingredients = relationship(
+        "Ingredient",
+        secondary=menu_item_ingredients,
         back_populates="menu_items"
     )

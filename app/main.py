@@ -6,7 +6,10 @@ from app.database import Base
 from app.models.user import User
 from app.models.restaurant import Restaurant
 from app.models.menu_item import MenuItem
+from app.models.ingredient import Ingredient
+from app.models.menu_item_ingredient import menu_item_ingredients
 
+from app.routers import ingredients
 from app.routers import restaurants
 from app.routers import users
 
@@ -21,6 +24,7 @@ app = FastAPI(
 
 app.include_router(users.router)
 app.include_router(restaurants.router)
+app.include_router(ingredients.router)
 
 @app.get("/")
 def root():
