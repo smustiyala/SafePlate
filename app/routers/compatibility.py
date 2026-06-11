@@ -12,17 +12,96 @@ router = APIRouter(
     tags=["Compatibility"]
 )
 
-@router.get(
-    "/users/{user_id}/menu-items/{menu_item_id}"
-)
+
+def analyze_ingredient(ingredient):
+    compatible_with = []
+    incompatible_with = []
+
+    if ingredient.is_vegan:
+        compatible_with.append("Vegan")
+    else:
+        incompatible_with.append("Vegan")
+
+    if ingredient.is_vegetarian:
+        compatible_with.append("Vegetarian")
+    else:
+        incompatible_with.append("Vegetarian")
+
+    if not ingredient.contains_dairy:
+        compatible_with.append("Dairy-Free")
+    else:
+        incompatible_with.append("Dairy-Free")
+
+    if not ingredient.contains_egg:
+        compatible_with.append("Egg-Free")
+    else:
+        incompatible_with.append("Egg-Free")
+
+    if not ingredient.contains_nuts:
+        compatible_with.append("Nut-Free")
+    else:
+        incompatible_with.append("Nut-Free")
+
+    return {
+        "ingredient": ingredient.name,
+        "compatible_with": compatible_with,
+        "incompatible_with": incompatible_with
+    }
+
+
+def evaluate_menu_item(menu_item, preference_names):
+    issues = []
+    recommendations = []
+    ingredient_analysis = []
+
+    for ingredient in menu_item.ingredients:
+        ingredient_analysis.append(analyze_ingredient(ingredient))
+
+        if "Vegan" in preference_names and not ingredient.is_vegan:
+            issues.append(f"{ingredient.name} is not vegan")
+            recommendations.append(f"Remove {ingredient.name}")
+
+        if "Vegetarian" in preference_names and not ingredient.is_vegetarian:
+            issues.append(f"{ingredient.name} is not vegetarian")
+            recommendations.append(f"Remove {ingredient.name}")
+
+        if "Dairy-Free" in preference_names and ingredient.contains_dairy:
+            issues.append(f"{ingredient.name} contains dairy")
+            recommendations.append(f"Remove {ingredient.name}")
+
+        if "Egg-Free" in preference_names and ingredient.contains_egg:
+            issues.append(f"{ingredient.name} contains egg")
+            recommendations.append(f"Remove {ingredient.name}")
+
+        if "Nut-Free" in preference_names and ingredient.contains_nuts:
+            issues.append(f"{ingredient.name} contains nuts")
+            recommendations.append(f"Remove {ingredient.name}")
+
+    recommendations = list(dict.fromkeys(recommendations))
+
+    if not issues:
+        status = "safe"
+    elif len(recommendations) < len(menu_item.ingredients):
+        status = "modifiable"
+    else:
+        status = "unsafe"
+
+    return {
+        "menu_item": menu_item.name,
+        "status": status,
+        "issues": issues,
+        "recommendations": recommendations,
+        "ingredient_analysis": ingredient_analysis
+    }
+
+
+@router.get("/users/{user_id}/menu-items/{menu_item_id}")
 def check_compatibility(
     user_id: int,
     menu_item_id: int,
     db: Session = Depends(get_db)
 ):
-    user = db.query(User).filter(
-        User.id == user_id
-    ).first()
+    user = db.query(User).filter(User.id == user_id).first()
 
     if not user:
         raise HTTPException(
@@ -30,9 +109,7 @@ def check_compatibility(
             detail="User not found"
         )
 
-    menu_item = db.query(MenuItem).filter(
-        MenuItem.id == menu_item_id
-    ).first()
+    menu_item = db.query(MenuItem).filter(MenuItem.id == menu_item_id).first()
 
     if not menu_item:
         raise HTTPException(
@@ -45,87 +122,21 @@ def check_compatibility(
         for preference in user.dietary_preferences
     }
 
-    issues = []
-    recommendations = []
-
-    for ingredient in menu_item.ingredients:
-
-        if (
-            "Vegan" in preference_names
-            and not ingredient.is_vegan
-        ):
-            issues.append(
-                f"{ingredient.name} is not vegan"
-            )
-
-            recommendations.append(
-                f"Remove {ingredient.name}"
-            )
-
-        if (
-            "Dairy-Free" in preference_names
-            and ingredient.contains_dairy
-        ):
-            issues.append(
-                f"{ingredient.name} contains dairy"
-            )
-
-            recommendations.append(
-                f"Remove {ingredient.name}"
-            )
-
-        if (
-            "Egg-Free" in preference_names
-            and ingredient.contains_egg
-        ):
-            issues.append(
-                f"{ingredient.name} contains egg"
-            )
-
-            recommendations.append(
-                f"Remove {ingredient.name}"
-            )
-
-        if (
-            "Nut-Free" in preference_names
-            and ingredient.contains_nuts
-        ):
-            issues.append(
-                f"{ingredient.name} contains nuts"
-            )
-
-            recommendations.append(
-                f"Remove {ingredient.name}"
-            )
-
-    if not issues:
-        status = "safe"
-
-    elif len(recommendations) < len(menu_item.ingredients):
-        status = "modifiable"
-
-    else:
-        status = "unsafe"
+    result = evaluate_menu_item(menu_item, preference_names)
 
     return {
         "user": user.username,
-        "menu_item": menu_item.name,
-        "status": status,
-        "issues": issues,
-        "recommendations": recommendations
+        **result
     }
 
-@router.get(
-    "/restaurants/{restaurant_id}/compatible-menu-items/{user_id}"
-)
+
+@router.get("/restaurants/{restaurant_id}/compatible-menu-items/{user_id}")
 def get_compatible_menu_items(
     restaurant_id: int,
     user_id: int,
     db: Session = Depends(get_db)
 ):
-    user = db.query(User).filter(
-        User.id == user_id
-    ).first()
+    user = db.query(User).filter(User.id == user_id).first()
 
     if not user:
         raise HTTPException(
@@ -133,9 +144,7 @@ def get_compatible_menu_items(
             detail="User not found"
         )
 
-    restaurant = db.query(Restaurant).filter(
-        Restaurant.id == restaurant_id
-    ).first()
+    restaurant = db.query(Restaurant).filter(Restaurant.id == restaurant_id).first()
 
     if not restaurant:
         raise HTTPException(
@@ -151,57 +160,8 @@ def get_compatible_menu_items(
     results = []
 
     for menu_item in restaurant.menu_items:
-
-        issues = []
-
-        for ingredient in menu_item.ingredients:
-
-            if (
-                "Vegan" in preference_names
-                and not ingredient.is_vegan
-            ):
-                issues.append(
-                    f"{ingredient.name} is not vegan"
-                )
-
-            if (
-                "Dairy-Free" in preference_names
-                and ingredient.contains_dairy
-            ):
-                issues.append(
-                    f"{ingredient.name} contains dairy"
-                )
-
-            if (
-                "Egg-Free" in preference_names
-                and ingredient.contains_egg
-            ):
-                issues.append(
-                    f"{ingredient.name} contains egg"
-                )
-
-            if (
-                "Nut-Free" in preference_names
-                and ingredient.contains_nuts
-            ):
-                issues.append(
-                    f"{ingredient.name} contains nuts"
-                )
-
-        if not issues:
-            status = "safe"
-
-        elif len(issues) < len(menu_item.ingredients):
-            status = "modifiable"
-
-        else:
-            status = "unsafe"
-
         results.append(
-            {
-                "menu_item": menu_item.name,
-                "status": status
-            }
+            evaluate_menu_item(menu_item, preference_names)
         )
 
     return {
