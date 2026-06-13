@@ -10,6 +10,7 @@ from app.models.ingredient import Ingredient
 from app.models.menu_item_ingredient import menu_item_ingredients
 from app.models.dietary_preference import DietaryPreference
 from app.models.user_preference import user_preferences
+from app.seed_data import seed_database
 
 from app.routers import compatibility
 from app.routers import dietary_preferences
@@ -45,3 +46,9 @@ def health_check():
         "status": "healthy"
     }
 
+@app.post("/admin/seed")
+def seed_database_endpoint():
+    seed_database()
+    return {
+        "message": "Database seeded successfully"
+    }
