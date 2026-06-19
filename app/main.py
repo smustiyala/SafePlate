@@ -32,7 +32,7 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=[
         "http://localhost:5173",
-        "https://safeplate-bhn3.onrender.com",
+        "https://safeplate-frontend-k8du.onrender.com",
     ],
     allow_credentials=True,
     allow_methods=["*"],
