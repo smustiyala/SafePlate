@@ -1,72 +1,123 @@
 # SafePlate
 
-SafePlate is a dietary compatibility platform that helps users determine whether restaurant menu items match their dietary preferences.
+A full-stack dietary compatibility platform that helps users determine whether restaurant menu items align with their dietary preferences and restrictions. Users can create accounts, select dietary preferences, browse restaurant menus, and receive ingredient-level compatibility analysis with modification recommendations.
 
-Users can register, select dietary preferences such as Vegan, Vegetarian, Dairy-Free, Egg-Free, and Nut-Free, and receive compatibility recommendations for restaurant menu items based on ingredient analysis.
+## Live Demo
+
+Frontend: https://safeplate-frontend-k8du.onrender.com
+
+Backend API Documentation: https://safeplate-bhn3.onrender.com/docs
 
 ## Features
 
-* User Registration and Authentication (JWT)
-* Dietary Preference Management
-* Restaurant and Menu Item Management
-* Ingredient Compatibility Analysis
-* Personalized Food Recommendations
-* PostgreSQL Database Integration
-* Docker Containerization
-* GitHub Actions CI/CD Pipeline
+* User registration and login
+* Dietary preference selection (Vegan, Vegetarian, Dairy-Free, Egg-Free, Nut-Free)
+* Restaurant menu browsing
+* Ingredient-level compatibility analysis
+* Compatibility classifications (Safe, Modifiable, Unsafe)
+* Personalized dietary recommendations
+* Cloud-hosted frontend and backend
+* Automated CI/CD deployment pipeline
 
-## Tech Stack
+## Technology Stack
+
+### Frontend
+
+* React
+* JavaScript
+* HTML
+* CSS
+* Axios
 
 ### Backend
 
-* Python
 * FastAPI
+* Python
 * SQLAlchemy
-* PostgreSQL
-* JWT Authentication
+* REST APIs
 
-### DevOps
+### Database
+
+* PostgreSQL
+
+### Cloud & DevOps
 
 * Docker
+* Render
+* Git
+* GitHub
 * GitHub Actions
+* CI/CD
 
 ## Architecture
 
-User → FastAPI API → SQLAlchemy → PostgreSQL
+React Frontend
+→ FastAPI Backend
+→ SQLAlchemy ORM
+→ PostgreSQL Database
 
-## Example Compatibility Response
+The frontend communicates with FastAPI REST endpoints to retrieve restaurant, menu item, ingredient, and compatibility data. SQLAlchemy manages database interactions and PostgreSQL stores application data.
 
-```json
-{
-  "user": "sai",
-  "menu_item": "Cheese Quesadilla",
-  "status": "modifiable",
-  "issues": [
-    "Cheese contains dairy"
-  ],
-  "recommendations": [
-    "Remove Cheese"
-  ]
-}
-```
+## Core Functionality
 
-## Running Locally
+Users create an account and select dietary preferences. The compatibility engine analyzes ingredients associated with each menu item and determines whether the item satisfies the user's dietary requirements.
 
-```bash
-pip install -r requirements.txt
-uvicorn app.main:app --reload
-```
+Example:
 
-## Running with Docker
+Dietary Preference:
 
-```bash
-docker build -t safeplate .
-docker run -p 8000:8000 --env-file .env safeplate
-```
+* Vegan
+
+Menu Item:
+
+* Cheese Pizza
+
+Result:
+
+* Modifiable
+
+Issue:
+
+* Mozzarella is not vegan
+
+Recommendation:
+
+* Remove Mozzarella
+
+## Database Design
+
+Key entities include:
+
+* Users
+* Dietary Preferences
+* Restaurants
+* Menu Items
+* Ingredients
+
+The application uses relational database modeling with many-to-many relationships between users and dietary preferences, as well as menu items and ingredients.
+
+## API Capabilities
+
+* User Authentication
+* Restaurant Management
+* Menu Item Management
+* Ingredient Management
+* Dietary Preference Management
+* Compatibility Analysis
 
 ## Future Enhancements
 
-* Frontend Web Application
-* Cloud Deployment
-* Automated Testing
-* Additional Restaurant Integrations
+* JWT-based authentication
+* User profile management
+* Advanced restaurant search and filtering
+* Expanded restaurant dataset
+* Mobile-responsive UI improvements
+* Personalized saved favorites
+
+## Author
+
+Saipraneeth Mustiyala
+
+Computer Science Student, The University of Texas at Dallas
+
+Expected Graduation: December 2026
